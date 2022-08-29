@@ -1,5 +1,5 @@
-# go-x509-asn1-parser
-Go/Golang x509 and ASN1 parser, does not using encoding/asn1
+# go-asn1-x509-reader
+Go/Golang x509 and ASN1 reader, does not using the official encoding/asn1 package
 
 Sample output of X509 parser (main1.go):
 ```
