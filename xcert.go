@@ -33,18 +33,18 @@ func (r *XCert) LoadPEM(filename string) {
     reader := ASN1PEMReader{ bytes:rawbin, pos:0 }
     r.root = reader.ReadRootNode()
     //r.root.OutputAll(0)
-    r.version = r.getVersion()
+    r.version = r.GetVersion()
 }
 
 func (r *XCert) whichChild(which int) *ASN1Node {
-    if r.getVersion()==3 {
+    if r.GetVersion()==3 {
         path:= fmt.Sprintf("0-%d", which)
         return r.root.ChildPath(path)
     }
     return &r.root
 }
 
-func (r *XCert) getVersion() int {
+func (r *XCert) GetVersion() int {
     if r.root.ChildPath("0-0-0")!=nil && r.root.ChildPath("0-0").tag==0xa0 && r.root.ChildPath("0-0-0").tag==0x02 {
         encoded_version,_ := strconv.Atoi(r.root.ChildPath("0-0-0").Content())
         return encoded_version+1
@@ -52,20 +52,20 @@ func (r *XCert) getVersion() int {
     return 1
 }
 
-func (r *XCert) getSerialNumber() string {
+func (r *XCert) GetSerialNumber() string {
     return r.whichChild(1).Content()
 }
 
-func (r *XCert) getSignatureType() string {
+func (r *XCert) GetSignatureType() string {
     node:= r.whichChild(2)
     return getOidName(node.ChildPath("0").Content())
 }
 
-func (r *XCert) getIssuer() map[string][]string {
+func (r *XCert) GetIssuer() map[string][]string {
     return r.getSubjectIssuer(3)
 }
 
-func (r *XCert) getValidDates() []string {
+func (r *XCert) GetValidDates() []string {
     output := []string{}
     node := r.whichChild(4)
     if  node.ChildPath("0")!=nil {
@@ -77,7 +77,7 @@ func (r *XCert) getValidDates() []string {
     return output
 }
 
-func (r *XCert) getSubject() map[string][]string {
+func (r *XCert) GetSubject() map[string][]string {
     return r.getSubjectIssuer(5)
 }
 
@@ -103,7 +103,7 @@ func (r *XCert) countBits(rawbytes []byte) int {
     return len(rawbytes[8:])*8+bits
 }
 
-func (r *XCert) getKeyInfo() map[string]string {
+func (r *XCert) GetKeyInfo() map[string]string {
     output := map[string]string{}
     node := r.whichChild(6)
     //node.OutputAll(0)
@@ -137,7 +137,7 @@ func (r *XCert) getKeyInfo() map[string]string {
     return output
 }
 
-func (r *XCert) getExtensionInfo() (map[string]string, []string) {
+func (r *XCert) GetExtensionInfo() (map[string]string, []string) {
     extensions := map[string]string {}
     criticals := []string {}
     if r.version!=3 {
@@ -270,41 +270,3 @@ func (r *XCert) keyUsageParser(raw []byte) []string {
     }
     return entries;
 }
-
-/*
-func main() {    
-     
-    r := XCert{}
-    //r.LoadPEM("certs/www-digicert-com.pem")
-    r.LoadPEM("certs/cert-date.pem")
-    
-    fmt.Printf("cert.version: [%d]\n", r.getVersion())
-    fmt.Printf("cert.serialNumber: [%s]\n", r.getSerialNumber())
-    fmt.Printf("cert.signatureType: [%s]\n", r.getSignatureType())
-    for k,v :=range(r.getIssuer()) {        
-        for _,vv:=range(v) {
-            fmt.Printf("issuer.%s: [%s]\n", k, vv ) 
-        }
-        //fmt.Printf("issuer.%s: [%s]\n", k, strings.Join(v,"][") ) 
-    }
-    validityDates:= r.getValidDates()
-    fmt.Printf("validity.issuance: [%s]\n", validityDates[0])
-    fmt.Printf("validity.expiry: [%s]\n", validityDates[1])
-
-    for k,v :=range(r.getSubject()) {
-        for _,vv:=range(v) {
-            fmt.Printf("subject.%s: [%s]\n", k, vv ) 
-        }
-        //fmt.Printf("subject.%s: [%s]\n", k, strings.Join(v,"][") ) 
-    }
-    for k,v :=range(r.getKeyInfo()) {
-        fmt.Printf("keyInfo.%s: [%s]\n", k, v ) 
-    }
-    extensions,criticals:= r.getExtensionInfo()
-    for k,v :=range(extensions) {
-        fmt.Printf("extensionInfo.%s: [%s]\n", k, v ) 
-    }
-    fmt.Printf("extensionInfo.critical: %s\n", strings.Join(criticals, ","))
-
-}
-*/

@@ -4,6 +4,10 @@ type ASN1PEMReader struct {
     bytes []byte
     pos int
 }
+func (asn1_file *ASN1PEMReader) Init(bytes []byte) {
+    asn1_file.bytes = bytes
+    asn1_file.pos = 0
+}
 func (asn1_file *ASN1PEMReader) FastForward(pos int) {
     asn1_file.pos = pos
 }

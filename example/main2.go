@@ -1,22 +1,21 @@
 package main
 
 import (
+    "fmt"
     "io/ioutil"
-    "github.com/mk-j/go-asn1-x509-parser"
+    "github.com/mk-j/go-asn1-x509-reader"
 )
-//----------------------------------------------------------------------
 
-func main() {    
-     
+func main() {
 
     allbytes, err := ioutil.ReadFile("../certs/cert-ct.pem")
     if (err!=nil) {
         fmt.Println(err)
     }
     rawbin := asn1x.PEMToDER(allbytes)
-    reader := asn1x.ASN1PEMReader{ bytes:rawbin, pos:0}
-    root:= reader.ReadRootNode()  
+    reader := asn1x.ASN1PEMReader{}
+    reader.Init(rawbin)
+    root:= reader.ReadRootNode()
     root.OutputAll(0)
-
 }
 
